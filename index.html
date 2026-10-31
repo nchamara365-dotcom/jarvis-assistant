@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JARVIS AI</title>
+<style>
+body {
+  background: #020812;
+  color: #00eaff;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 25px 12px;
+}
+#face {
+  width: 190px;
+  height: 190px;
+  border: 4px solid #00eaff;
+  border-radius: 50%;
+  margin: 45px auto 25px;
+  box-shadow: 0 0 25px #00eaff, inset 0 0 25px #00eaff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 65px;
+}
+button {
+  display: block;
+  width: 90%;
+  max-width: 300px;
+  margin: 15px auto;
+  padding: 16px;
+  border-radius: 30px;
+  border: 1px solid #00eaff;
+  background: #061c30;
+  color: #00eaff;
+  font-size: 17px;
+}
+#status { margin: 20px; color: white; }
+</style>
+</head>
+<body>
+
+<h1>J.A.R.V.I.S</h1>
+<div id="face">◉</div>
+<p id="status">JARVIS සූදානම්</p>
+
+<button onclick="speak('ආයුබෝවන්. මම ජාර්විස්. ඔබට උදව් කිරීමට සූදානම්.')">
+JARVIS අවදි කරන්න
+</button>
+
+<button onclick="listen()">🎤 කතා කරන්න</button>
+<button onclick="tellTime()">🕒 වෙලාව කියන්න</button>
+<button onclick="speechSynthesis.cancel()">නවත්වන්න</button>
+
+<script>
+function speak(message) {
+  speechSynthesis.cancel();
+  let msg = new SpeechSynthesisUtterance(message);
+  msg.lang = "si-LK";
+  msg.pitch = 0.65;
+  msg.rate = 0.85;
+  speechSynthesis.speak(msg);
+  document.getElementById("status").innerText = message;
+}
+
+function tellTime() {
+  let now = new Date();
+  speak("දැන් වෙලාව " +
+    now.getHours() + "යි " +
+    now.getMinutes() + "යි");
+}
+
+function listen() {
+  const SR = window.SpeechRecognition ||
+             window.webkitSpeechRecognition;
+
+  if (!SR) {
+    speak("ඔබගේ බ්‍රවුසරයේ හඬ හඳුනාගැනීම සහාය නොදක්වයි.");
+    return;
+  }
+
+  let rec = new SR();
+  rec.lang = "si-LK";
+  rec.continuous = false;
+  rec.interimResults = false;
+
+  document.getElementById("status").innerText =
+    "මම අහගෙන ඉන්නේ. කතා කරන්න.";
+
+  rec.onresult = function(event) {
+    let words = event.results[0][0].transcript;
+    document.getElementById("status").innerText = words;
+
+    if (words.includes("වෙලාව")) {
+      tellTime();
+    } else if (words.includes("ආයුබෝවන්")) {
+      speak("ආයුබෝවන්. ඔබට කොහොමද?");
+    } else if (words.includes("නම")) {
+      speak("මගේ නම ජාර්විස්.");
+    } else {
+      speak("ඔබ පැවසුවේ " + words +
+            ". මම ඔබට උදව් කිරීමට සූදානම්.");
+    }
+  };
+
+  rec.onerror = function() {
+    document.getElementById("status").innerText =
+      "මයික්‍රෆෝනය හෝ හඬ හඳුනාගැනීම පරීක්ෂා කරන්න.";
+  };
+
+  rec.start();
+}
+</script>
+</body>
+</html>
